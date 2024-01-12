@@ -1,9 +1,9 @@
 @ECHO OFF
-REM -- Automates cygwin installation and cygwin 1.7.4.4 compilation
+REM -- Automates cygwin installation and cygwin 1.8.0.0 compilation
 REM -- Sources: 
 REM --- https://github.com/rtwolf/cygwin-auto-install
 REM --- https://gist.github.com/wjrogers/1016065
-REM --- https://github.com/valorisa/socat-1.7.4.4_for_Windows
+REM --- https://github.com/valorisa/socat-1.8.0.0_for_Windows
  
 SETLOCAL
 
@@ -28,19 +28,43 @@ SET SITE=http://ucmirror.canterbury.ac.nz/cygwin
 SET LOCALDIR=%CD%
 SET ROOTDIR=C:\cygwin64
 SET CYGWINROOTDIR=\
-SET SOCAT=socat-1.7.4.4
+SET SOCAT=socat-1.8.0.0
  
 REM -- These are the packages we will install to compile socat (in addition to the default packages)
 SET PACKAGES=wget,gcc-g++,gcc-core,make,gcc-fortran,gcc-objc,gcc-objc++,libkrb5-devel,libkrb5_3,libreadline-devel,libssl-devel,libwrap-devel,tcp_wrappers
  
 REM -- More info on command line options at: https://cygwin.com/faq/faq.html#faq.setup.cli
 REM -- Do it!
+
+REM -- Check if Cygwin is installed
+SET CYGWINROOTDIR=C:\cygwin64
+IF EXIST "%CYGWINROOTDIR%\bin\bash.exe" (
+    ECHO Cygwin is already installed.
+) ELSE (
+    ECHO Installing Cygwin...
+    REM -- Installation commands here
+
 ECHO *** INSTALLING DEFAULT PACKAGES
-cygwin-setup64 --quiet-mode --no-desktop --download --local-install --no-verify -s %SITE% -l "%LOCALDIR%" -R "%ROOTDIR%"
+start /wait cygwin-setup64 --quiet-mode --no-desktop --download --local-install --no-verify -s %SITE% -l "%LOCALDIR%" -R "%ROOTDIR%"
+)
 ECHO.
 ECHO.
-ECHO *** INSTALLING CUSTOM PACKAGES
-cygwin-setup64 -q -d -D -L -X -s %SITE% -l "%LOCALDIR%" -R "%ROOTDIR%" -P %PACKAGES%
+REM -- Check and install necessary packages
+SET PACKAGES="wget gcc-g++ gcc-core make gcc-fortran gcc-objc gcc-objc++ libkrb5-devel libkrb5_3 libreadline-devel libssl-devel libwrap-devel tcp_wrappers"
+FOR %%P IN (%PACKAGES%) DO (
+    %CYGWINROOTDIR%\bin\bash.exe --login -c "cygcheck -c %%P | grep 'OK'"
+    IF ERRORLEVEL 1 (
+        ECHO Installing package: %%P
+        start /wait cygwin-setup64 -q -d -D -L -X -s %SITE% -l "%LOCALDIR%" -R "%ROOTDIR%" -P %%P
+    ) ELSE (
+        ECHO Package %%P is already installed.
+    )
+)
+
+
+
+@REM ECHO *** INSTALLING CUSTOM PACKAGES
+@REM start /wait cygwin-setup64 -q -d -D -L -X -s %SITE% -l "%LOCALDIR%" -R "%ROOTDIR%" -P %PACKAGES%
  
 REM -- Show what we did
 ECHO.
