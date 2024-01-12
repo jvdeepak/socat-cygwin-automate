@@ -85,16 +85,16 @@ IF NOT EXIST %SOCAT:~0%.tar.gz (
 )
 
 REM -- Extract Socat
-%ROOTDIR%\bin\bash.exe --login -c "cd / && tar xzf socat*.tar.gz"
+%ROOTDIR%\bin\bash.exe --login -c "cd / && tar xzf /$1.tar.gz" -- %SOCAT%
 
 REM -- Configure Socat
-%ROOTDIR%\bin\bash.exe --login -c "cd $(find / -maxdepth 1 -type d -name 'socat*') && ./configure"
+%ROOTDIR%\bin\bash.exe --login -c "cd /$1 && ./configure" -- %SOCAT%
 
 REM -- Make Socat
-%ROOTDIR%\bin\bash.exe --login -c "cd $(find / -maxdepth 1 -type d -name 'socat*') && make"
+%ROOTDIR%\bin\bash.exe --login -c "cd /$1 && make" -- %SOCAT%
 
 REM -- Copy cygwin .dll's into socat folder
-%ROOTDIR%\bin\bash.exe --login -c "find /bin/ -name 'cyg*.dll' -exec cp {} $(find / -maxdepth 1 -type d -name 'socat*') \;"
+%ROOTDIR%\bin\bash.exe --login -c "find /bin/ -name 'cyg*.dll' -exec cp {} /$1 \;" -- %SOCAT%
 
 ECHO.
 ECHO Socat is compiled and installed! You should see an error that socat expected two inputs but none were given, below.
